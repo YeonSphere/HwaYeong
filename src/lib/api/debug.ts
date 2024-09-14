@@ -1,3 +1,6 @@
+import { Platform, type PlatformConstants } from "react-native";
+import { version } from "bunny-build-info";
+
 import { findAssetId } from "@lib/api/assets";
 import { getLoaderName, getLoaderVersion, isThemeSupported } from "@lib/api/native/loader";
 import { BundleUpdaterManager, ClientInfoManager, DeviceManager } from "@lib/api/native/modules";
@@ -6,9 +9,8 @@ import { settings } from "@lib/api/settings";
 import { getThemeFromLoader, selectTheme, themes } from "@lib/themes";
 import { logger } from "@lib/utils/logger";
 import { showToast } from "@ui/toasts";
-import { version } from "bunny-build-info";
-import { Platform, type PlatformConstants } from "react-native";
-export let socket: WebSocket;
+
+export let socket: WebSocket | null = null;
 
 export interface RNConstants extends PlatformConstants {
     // Android
@@ -29,9 +31,10 @@ export interface RNConstants extends PlatformConstants {
 }
 
 /**
+ * Toggles safe mode and applies theme changes accordingly.
  * @internal
  */
-export async function toggleSafeMode() {
+export async function toggleSafeMode(): Promise<void> {
     settings.safeMode = { ...settings.safeMode, enabled: !settings.safeMode?.enabled };
     if (isThemeSupported()) {
         if (getThemeFromLoader()?.id) settings.safeMode!.currentThemeId = getThemeFromLoader()!.id;
@@ -85,7 +88,7 @@ export function patchLogHook() {
 }
 
 /** @internal */
-export const versionHash = version;
+export const bunnyVersionHash = version;
 
 export function getDebugInfo() {
     // Hermes
